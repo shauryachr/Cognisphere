@@ -1,1 +1,855 @@
-<PLACEHOLDER>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cognisphere — Energy Management</title>
+  <meta name="description" content="Simple, intelligent energy management for modern teams." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #111111;
+      --surface-hover: #181818;
+      --border: #222222;
+      --border-hover: #333333;
+      --text: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-muted: #666666;
+      --radius: 12px;
+      --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .fog {
+      position: fixed;
+      width: 50vw;
+      height: 50vw;
+      max-width: 600px;
+      max-height: 600px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+      filter: blur(120px);
+      opacity: 0.18;
+      background: #ffffff;
+    }
+
+    .fog-tl { top: -18%; left: -12%; }
+    .fog-tr { top: -20%; right: -12%; }
+    .fog-bl { bottom: -18%; left: -10%; }
+    .fog-br { bottom: -20%; right: -10%; }
+
+    .container {
+      width: min(1040px, 90%);
+      margin-inline: auto;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .btn-primary:hover {
+      background: #e5e5e5;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border-hover);
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 18px 0;
+      transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+      border-bottom: 1px solid transparent;
+    }
+
+    nav.scrolled {
+      background: rgba(0, 0, 0, 0.9);
+      border-bottom-color: var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 20px;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.03em;
+    }
+
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: #ffffff;
+      display: grid;
+      place-items: center;
+    }
+
+    .logo-mark svg {
+      width: 14px;
+      height: 14px;
+      fill: #000000;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s var(--ease);
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .nav-cta .btn {
+      padding: 9px 18px;
+      font-size: 13.5px;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .hero {
+      padding: 150px 0 80px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+
+    .hero-badge span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ffffff;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 460px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-visual {
+      margin-top: 64px;
+    }
+
+    .dashboard-preview {
+      width: 100%;
+      max-width: 840px;
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #333333;
+    }
+
+    .preview-body {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 16px;
+      min-height: 260px;
+    }
+
+    .preview-card {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .preview-card h4 {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 10px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .big-stat {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .stat-change {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 90px;
+      margin-top: 20px;
+    }
+
+    .bar {
+      flex: 1;
+      border-radius: 3px 3px 1px 1px;
+      background: #333333;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .mini-stat {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .mini-stat .value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .mini-stat .label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    section {
+      padding: 80px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .section-header p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      padding: 28px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.25s var(--ease), background 0.25s var(--ease);
+    }
+
+    .feature-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-hover);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+    }
+
+    .feature-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-secondary);
+      fill: none;
+      stroke-width: 1.7;
+    }
+
+    .feature-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.925rem;
+      line-height: 1.6;
+    }
+
+    .stats {
+      padding: 20px 0 60px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 36px 16px;
+      background: var(--bg);
+    }
+
+    .stat-item .number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.1rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .stat-item .label {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .step {
+      text-align: center;
+      padding: 36px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.25s var(--ease), background 0.25s var(--ease);
+    }
+
+    .step:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-hover);
+    }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 18px;
+    }
+
+    .step h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      color: var(--text-secondary);
+      font-size: 0.925rem;
+    }
+
+    .cta {
+      padding: 40px 0 90px;
+    }
+
+    .cta-box {
+      padding: 56px 40px;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .cta-box h2 {
+      font-size: clamp(1.7rem, 3.5vw, 2.2rem);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .cta-box p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 380px;
+      margin: 0 auto 28px;
+    }
+
+    footer {
+      padding: 36px 0 28px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-secondary);
+    }
+
+    .copyright {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 860px) {
+      .nav-links { display: none; }
+      .menu-toggle { display: block; }
+      .preview-body { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .steps { grid-template-columns: 1fr; max-width: 340px; margin: 0 auto; }
+      .cta-box { padding: 44px 24px; }
+    }
+
+    @media (max-width: 520px) {
+      .hero { padding: 130px 0 50px; }
+      .stat-item { padding: 28px 12px; }
+      .stat-item .number { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="fog fog-tl"></div>
+  <div class="fog fog-tr"></div>
+  <div class="fog fog-bl"></div>
+  <div class="fog fog-br"></div>
+
+  <nav id="nav">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        Cognisphere
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#stats">Impact</a></li>
+      </ul>
+
+      <div class="nav-cta">
+        <a href="#" class="btn btn-ghost">Log in</a>
+        <a href="signup/" class="btn btn-primary">Start free</a>
+      </div>
+
+      <button class="menu-toggle" aria-label="Menu">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <span></span>
+        Real-time energy intelligence
+      </div>
+
+      <h1>Energy management,<br>made simple</h1>
+
+      <p>
+        Monitor, optimize, and control energy across all your sites with a focused platform built for clarity.
+      </p>
+
+      <div class="hero-actions">
+        <a href="signup/" class="btn btn-primary">Get started free</a>
+        <a href="#features" class="btn btn-ghost">See features</a>
+      </div>
+
+      <div class="hero-visual">
+        <div class="dashboard-preview">
+          <div class="preview-header">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-card">
+              <h4>Total consumption today</h4>
+              <div class="big-stat">2,847 kWh</div>
+              <div class="stat-change">↓ 12.4% vs yesterday</div>
+              <div class="chart-bars">
+                <div class="bar" style="height: 40%"></div>
+                <div class="bar" style="height: 62%"></div>
+                <div class="bar" style="height: 48%"></div>
+                <div class="bar" style="height: 78%"></div>
+                <div class="bar" style="height: 55%"></div>
+                <div class="bar" style="height: 70%"></div>
+                <div class="bar" style="height: 38%"></div>
+                <div class="bar" style="height: 65%"></div>
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar" style="height: 82%"></div>
+                <div class="bar" style="height: 45%"></div>
+                <div class="bar" style="height: 60%"></div>
+              </div>
+            </div>
+            <div class="mini-grid">
+              <div class="mini-stat">
+                <div class="value">94%</div>
+                <div class="label">Efficiency</div>
+              </div>
+              <div class="mini-stat">
+                <div class="value">18</div>
+                <div class="label">Active sites</div>
+              </div>
+              <div class="mini-stat">
+                <div class="value">$4.2k</div>
+                <div class="label">Saved this month</div>
+              </div>
+              <div class="mini-stat">
+                <div class="value">0</div>
+                <div class="label">Open alerts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Everything you need</h2>
+        <p>A focused set of tools designed for clarity and results.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>
+          </div>
+          <h3>Live monitoring</h3>
+          <p>See energy flow across every meter and zone in real time with zero lag.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          </div>
+          <h3>Smart optimization</h3>
+          <p>AI suggestions that actually reduce waste by learning your usage patterns.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Intelligent alerts</h3>
+          <p>Get notified only when it matters — anomalies, peaks, and threshold breaches.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>Multi-site view</h3>
+          <p>Manage buildings, campuses, or entire portfolios from one clean dashboard.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          </div>
+          <h3>Reports & export</h3>
+          <p>Clean automated reports for sustainability teams, finance, and compliance.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <h3>Team access</h3>
+          <p>Invite facilities, sustainability, and ops teams with role-based permissions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stats" class="stats">
+    <div class="container">
+      <div class="stats-row reveal">
+        <div class="stat-item">
+          <div class="number">32%</div>
+          <div class="label">Avg. cost reduction</div>
+        </div>
+        <div class="stat-item">
+          <div class="number">2.4M</div>
+          <div class="label">kWh optimized monthly</div>
+        </div>
+        <div class="stat-item">
+          <div class="number">180+</div>
+          <div class="label">Sites connected</div>
+        </div>
+        <div class="stat-item">
+          <div class="number">99.9%</div>
+          <div class="label">Uptime</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Up and running quickly</h2>
+        <p>Connect, configure, and start saving — no complex rollout required.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-num">1</div>
+          <h3>Connect meters</h3>
+          <p>Link existing hardware or add cloud-ready sensors in minutes.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">2</div>
+          <h3>Set goals</h3>
+          <p>Define what matters most — cost, carbon, or peak demand.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">3</div>
+          <h3>Start saving</h3>
+          <p>Get live insights and automatic recommendations from day one.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <div class="cta-box reveal">
+        <h2>Ready to get started?</h2>
+        <p>Join teams who turned energy into a competitive advantage.</p>
+        <div class="hero-actions">
+          <a href="signup/" class="btn btn-primary">Start free trial</a>
+          <a href="#" class="btn btn-ghost">Talk to us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="#" class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        Cognisphere
+      </a>
+
+      <ul class="footer-links">
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Terms</a></li>
+        <li><a href="#">Docs</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+
+      <div class="copyright">© 2026 Cognisphere</div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 30);
+    }, { passive: true });
+
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
