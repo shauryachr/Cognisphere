@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign up — Aether</title>
+  <meta name="description" content="Create your Aether account and start managing energy smarter." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #111111;
+      --surface-hover: #181818;
+      --border: #222222;
+      --border-hover: #333333;
+      --text: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-muted: #666666;
+      --radius: 12px;
+      --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+      --error: #ff5a5a;
+      --success: #3dd68c;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+      overflow-x: hidden; -webkit-font-smoothing: antialiased; min-height: 100vh;
+    }
+    .fog {
+      position: fixed; width: 50vw; height: 50vw; max-width: 600px; max-height: 600px;
+      border-radius: 50%; pointer-events: none; z-index: -1; filter: blur(120px);
+      opacity: 0.18; background: #ffffff;
+    }
+    .fog-tl { top: -18%; left: -12%; }
+    .fog-tr { top: -20%; right: -12%; }
+    .fog-bl { bottom: -18%; left: -10%; }
+    .fog-br { bottom: -20%; right: -10%; }
+    .container { width: min(640px, 92%); margin-inline: auto; }
+    h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 600; letter-spacing: -0.03em; }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 0;
+      background: rgba(0,0,0,0.85); border-bottom: 1px solid var(--border); backdrop-filter: blur(12px);
+    }
+    .nav-inner {
+      width: min(1040px, 90%); margin-inline: auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px;
+      color: var(--text); text-decoration: none; letter-spacing: -0.03em;
+    }
+    .logo-mark {
+      width: 28px; height: 28px; border-radius: 6px; background: #ffffff;
+      display: grid; place-items: center;
+    }
+    .logo-mark svg { width: 14px; height: 14px; fill: #000000; }
+    .nav-right a { color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-right a:hover { color: var(--text); }
+
+    main { padding: 120px 0 80px; }
+    .page-header { text-align: center; margin-bottom: 40px; }
+    .page-header h1 { font-size: clamp(1.9rem, 4vw, 2.4rem); margin-bottom: 10px; }
+    .page-header p { color: var(--text-secondary); font-size: 1.05rem; }
+
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px 32px;
+    }
+    .form-section { margin-bottom: 32px; }
+    .form-section:last-of-type { margin-bottom: 0; }
+    .section-label {
+      font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 7px; }
+    label .required { color: var(--error); margin-left: 2px; }
+
+    input, select, textarea {
+      width: 100%; padding: 12px 14px; background: #0a0a0a; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 14.5px; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s var(--ease), background 0.2s; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #555; background: #0e0e0e; }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer;
+    }
+    select option { background: #111; color: #fff; }
+    textarea { resize: vertical; min-height: 90px; }
+    .hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+    .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-top: 8px; }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px; height: 18px; margin-top: 2px; accent-color: #fff; cursor: pointer; flex-shrink: 0;
+    }
+    .checkbox-group label { margin-bottom: 0; font-size: 13.5px; color: var(--text-secondary); line-height: 1.45; cursor: pointer; }
+    .checkbox-group a { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 24px; border-radius: 8px; font-size: 14.5px; font-weight: 500;
+      border: none; cursor: pointer; transition: all 0.25s var(--ease);
+      text-decoration: none; font-family: 'Inter', sans-serif; width: 100%;
+    }
+    .btn-primary { background: #ffffff; color: #000000; }
+    .btn-primary:hover:not(:disabled) { background: #e5e5e5; }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-spinner {
+      width: 16px; height: 16px; border: 2px solid transparent; border-top-color: #000;
+      border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+    }
+    .btn.loading .btn-spinner { display: block; }
+    .btn.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .message { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; display: none; }
+    .message.error { background: rgba(255,90,90,0.1); border: 1px solid rgba(255,90,90,0.3); color: var(--error); }
+    .message.success { background: rgba(61,214,140,0.1); border: 1px solid rgba(61,214,140,0.3); color: var(--success); }
+    .message.visible { display: block; }
+
+    .form-footer { text-align: center; margin-top: 28px; font-size: 14px; color: var(--text-secondary); }
+    .form-footer a { color: var(--text); text-decoration: none; font-weight: 500; }
+    .form-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 560px) {
+      .form-card { padding: 28px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="fog fog-tl"></div>
+  <div class="fog fog-tr"></div>
+  <div class="fog fog-bl"></div>
+  <div class="fog fog-br"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="../index.html" class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        Aether
+      </a>
+      <div class="nav-right">
+        <a href="#">Already have an account? Log in</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <div class="page-header">
+        <h1>Create your account</h1>
+        <p>Tell us about yourself and your team so we can get you set up.</p>
+      </div>
+
+      <div class="form-card">
+        <div id="form-message" class="message"></div>
+
+        <form id="signup-form" novalidate>
+          <div class="form-section">
+            <div class="section-label">Account</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="full_name">Full name <span class="required">*</span></label>
+                <input type="text" id="full_name" name="full_name" placeholder="Jane Doe" required autocomplete="name" />
+              </div>
+              <div class="form-group">
+                <label for="email">Work email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" placeholder="jane@company.com" required autocomplete="email" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="password">Password <span class="required">*</span></label>
+                <input type="password" id="password" name="password" placeholder="Min. 8 characters" required minlength="8" autocomplete="new-password" />
+                <div class="hint">At least 8 characters</div>
+              </div>
+              <div class="form-group">
+                <label for="confirm_password">Confirm password <span class="required">*</span></label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat password" required minlength="8" autocomplete="new-password" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">Contact</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone">Phone number <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" placeholder="+1 555 000 0000" required autocomplete="tel" />
+              </div>
+              <div class="form-group">
+                <label for="country">Country / Region <span class="required">*</span></label>
+                <select id="country" name="country" required>
+                  <option value="" disabled selected>Select country</option>
+                  <option value="IN">India</option>
+                  <option value="US">United States</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="CA">Canada</option>
+                  <option value="AU">Australia</option>
+                  <option value="DE">Germany</option>
+                  <option value="FR">France</option>
+                  <option value="SG">Singapore</option>
+                  <option value="AE">United Arab Emirates</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">Company</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="company_name">Company name <span class="required">*</span></label>
+                <input type="text" id="company_name" name="company_name" placeholder="Acme Corp" required autocomplete="organization" />
+              </div>
+              <div class="form-group">
+                <label for="job_title">Job title / Role <span class="required">*</span></label>
+                <input type="text" id="job_title" name="job_title" placeholder="Facilities Manager" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="company_size">Company size <span class="required">*</span></label>
+                <select id="company_size" name="company_size" required>
+                  <option value="" disabled selected>Select size</option>
+                  <option value="1-10">1–10 employees</option>
+                  <option value="11-50">11–50 employees</option>
+                  <option value="51-200">51–200 employees</option>
+                  <option value="201-500">201–500 employees</option>
+                  <option value="501-1000">501–1,000 employees</option>
+                  <option value="1000+">1,000+ employees</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="industry">Industry <span class="required">*</span></label>
+                <select id="industry" name="industry" required>
+                  <option value="" disabled selected>Select industry</option>
+                  <option value="manufacturing">Manufacturing</option>
+                  <option value="commercial-real-estate">Commercial Real Estate</option>
+                  <option value="healthcare">Healthcare</option>
+                  <option value="education">Education</option>
+                  <option value="hospitality">Hospitality</option>
+                  <option value="retail">Retail</option>
+                  <option value="data-centers">Data Centers</option>
+                  <option value="government">Government / Public Sector</option>
+                  <option value="energy-utilities">Energy & Utilities</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="company_website">Company website</label>
+                <input type="url" id="company_website" name="company_website" placeholder="https://company.com" />
+              </div>
+              <div class="form-group">
+                <label for="num_sites">Number of sites / locations <span class="required">*</span></label>
+                <select id="num_sites" name="num_sites" required>
+                  <option value="" disabled selected>Select range</option>
+                  <option value="1">1 site</option>
+                  <option value="2-5">2–5 sites</option>
+                  <option value="6-20">6–20 sites</option>
+                  <option value="21-50">21–50 sites</option>
+                  <option value="50+">50+ sites</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">Goals & context</div>
+            <div class="form-group">
+              <label for="primary_goal">Primary goal with Aether <span class="required">*</span></label>
+              <select id="primary_goal" name="primary_goal" required>
+                <option value="" disabled selected>What are you looking to achieve?</option>
+                <option value="reduce-costs">Reduce energy costs</option>
+                <option value="carbon-reduction">Cut carbon emissions</option>
+                <option value="peak-demand">Manage peak demand</option>
+                <option value="compliance">Meet reporting / compliance needs</option>
+                <option value="visibility">Get better visibility across sites</option>
+                <option value="automation">Automate energy decisions</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="how_heard">How did you hear about us?</label>
+              <select id="how_heard" name="how_heard">
+                <option value="" disabled selected>Select one (optional)</option>
+                <option value="google">Google search</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="referral">Referral / colleague</option>
+                <option value="conference">Conference / event</option>
+                <option value="podcast">Podcast / media</option>
+                <option value="partner">Partner / integrator</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="notes">Anything else we should know?</label>
+              <textarea id="notes" name="notes" placeholder="Current tools, specific requirements, timeline…"></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="checkbox-group">
+              <input type="checkbox" id="terms" name="terms" required />
+              <label for="terms">
+                I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>. <span class="required">*</span>
+              </label>
+            </div>
+            <div class="checkbox-group" style="margin-top: 14px;">
+              <input type="checkbox" id="marketing" name="marketing" />
+              <label for="marketing">
+                I’d like to receive product updates and energy insights from Aether.
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submit-btn" style="margin-top: 28px;">
+            <span class="btn-text">Create account</span>
+            <span class="btn-spinner"></span>
+          </button>
+        </form>
+
+        <div class="form-footer">
+          Already have an account? <a href="#">Log in</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // SUPABASE CONFIG — replace with your project values from
+    // Supabase Dashboard → Project Settings → API
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    let supabase = null;
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    const form = document.getElementById('signup-form');
+    const messageEl = document.getElementById('form-message');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = `message ${type} visible`;
+      messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function clearMessage() {
+      messageEl.className = 'message';
+      messageEl.textContent = '';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearMessage();
+      const data = Object.fromEntries(new FormData(form));
+
+      if (data.password !== data.confirm_password) {
+        showMessage('Passwords do not match.', 'error');
+        return;
+      }
+      if (data.password.length < 8) {
+        showMessage('Password must be at least 8 characters.', 'error');
+        return;
+      }
+      if (!data.terms) {
+        showMessage('You must agree to the Terms of Service and Privacy Policy.', 'error');
+        return;
+      }
+      if (!supabase) {
+        showMessage('Supabase is not configured yet. Replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY in this file.', 'error');
+        return;
+      }
+
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      try {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: data.email.trim(),
+          password: data.password,
+          options: { data: { full_name: data.full_name.trim() } },
+        });
+        if (authError) throw authError;
+
+        const userId = authData.user?.id;
+        if (userId) {
+          const { error: profileError } = await supabase.from('profiles').insert({
+            id: userId,
+            full_name: data.full_name.trim(),
+            email: data.email.trim(),
+            phone: data.phone.trim(),
+            country: data.country,
+            company_name: data.company_name.trim(),
+            job_title: data.job_title.trim(),
+            company_size: data.company_size,
+            industry: data.industry,
+            company_website: data.company_website?.trim() || null,
+            num_sites: data.num_sites,
+            primary_goal: data.primary_goal,
+            how_heard: data.how_heard || null,
+            notes: data.notes?.trim() || null,
+            marketing_opt_in: !!data.marketing,
+            created_at: new Date().toISOString(),
+          });
+          if (profileError) {
+            console.warn('Profile insert error:', profileError);
+            showMessage('Account created, but profile details could not be saved. Check your email to confirm.', 'success');
+          } else {
+            showMessage('Account created successfully! Check your email to confirm, then log in.', 'success');
+          }
+        } else {
+          showMessage('Account created. Please check your email to confirm before logging in.', 'success');
+        }
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        showMessage(err.message || 'Something went wrong. Please try again.', 'error');
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
